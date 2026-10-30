@@ -150,19 +150,3 @@ mypet/
     └── step3_dialog.cpp   — шаг 3: диалог с пользователем
 ```
 
----
-
-## 🚚 Перенос в GitVerse
-
-1. Создать пустой репозиторий на [gitverse.ru](https://gitverse.ru) (без README).
-2. В папке проекта добавить GitVerse как второй адрес и отправить код:
-
-```bash
-git remote add gitverse https://gitverse.ru/ИМЯ_ПОЛЬЗОВАТЕЛЯ/mypet.git
-```
-
-```bash
-git push gitverse main
-```
-
-Либо в GitVerse выбрать «Импорт репозитория» и указать ссылку на этот репозиторий GitHub.
