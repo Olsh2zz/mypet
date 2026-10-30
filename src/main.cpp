@@ -99,7 +99,7 @@ void showVictory(string petName)
     cout << "        / \\__" << endl;
     cout << "       (    ^\\___" << endl;
     cout << "       /         O     o\\_______/o" << endl;
-    cout << "      /   (_____/      o/_______\\o" << endl;
+    cout << "      /   (_____/      o/       \\o" << endl;
     cout << "     /_____/   U" << endl;
     cout << endl;
     cout << petName << " вырос и стал взрослым!" << endl;
