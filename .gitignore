@@ -11,3 +11,6 @@ build/
 .idea/
 *.sln
 *.vcxproj*
+
+# Сохранение игры
+pet_save.txt

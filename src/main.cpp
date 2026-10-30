@@ -11,10 +11,15 @@
 //    - цикл while: игра идёт, пока питомец "жив"
 //  Свои дополнительные характеристики:
 //    - энергия, здоровье, чистота, возраст (в днях)
+//  Ещё дополнительно:
+//    - две концовки: победа и поражение (с причиной)
+//    - пауза: игра сохраняется в файл и продолжается с того же места
 // =============================================================
 
 #include <iostream>
+#include <fstream> // для работы с файлом сохранения
 #include <string>
+#include <cstdio>  // для remove() - удаление файла
 #include <cstdlib> // для system()
 
 using namespace std;
@@ -25,6 +30,9 @@ const int MAX_VALUE = 100;
 
 // Сколько дней нужно прожить, чтобы питомец вырос (победа)
 const int DAYS_TO_GROW_UP = 30;
+
+// Имя файла, в который сохраняется игра на паузе
+const string SAVE_FILE = "pet_save.txt";
 
 // Функция не даёт показателю выйти за границы 0..100
 int limit(int value)
@@ -77,8 +85,42 @@ void showMenu()
     cout << "4 - Искупать" << endl;
     cout << "5 - Полечить" << endl;
     cout << "6 - Просто посидеть рядом" << endl;
-    cout << "0 - Выйти из игры" << endl;
+    cout << "0 - Пауза (сохранить и выйти)" << endl;
     cout << "Ваш выбор: ";
+}
+
+// Концовка 1: ПОБЕДА
+void showVictory(string petName)
+{
+    cout << endl;
+    cout << "*************************************" << endl;
+    cout << "*              ПОБЕДА!              *" << endl;
+    cout << "*************************************" << endl;
+    cout << "        / \\__" << endl;
+    cout << "       (    ^\\___" << endl;
+    cout << "       /         O     Гав-гав!" << endl;
+    cout << "      /   (_____/" << endl;
+    cout << "     /_____/   U" << endl;
+    cout << endl;
+    cout << petName << " вырос и стал взрослым!" << endl;
+    cout << "Вы отличный хозяин!" << endl;
+}
+
+// Концовка 2: ПОРАЖЕНИЕ (reason - причина поражения)
+void showDefeat(string petName, string reason)
+{
+    cout << endl;
+    cout << "*************************************" << endl;
+    cout << "*            ПОРАЖЕНИЕ...           *" << endl;
+    cout << "*************************************" << endl;
+    cout << "        / \\__" << endl;
+    cout << "       (    T\\___" << endl;
+    cout << "       /         O     Ску-ку..." << endl;
+    cout << "      /   (_____/" << endl;
+    cout << "     /_____/" << endl;
+    cout << endl;
+    cout << "Причина: " << petName << " " << reason << endl;
+    cout << "Попробуйте ещё раз и ухаживайте лучше!" << endl;
 }
 
 int main()
@@ -88,17 +130,8 @@ int main()
     system("chcp 65001 > nul");
 #endif
 
-    // ---------- Задание "ввести имя" ----------
-    string petName;
-    cout << "Как вы назовёте своего питомца? ";
-    getline(cin, petName);
-
-    // Если пользователь ничего не ввёл — даём имя по умолчанию
-    if (petName == "") {
-        petName = "Бобик";
-    }
-
     // ---------- Показатели питомца ----------
+    string petName = "Бобик";
     int hunger = 50;       // 0 - сыт, 100 - очень голоден
     int happiness = 50;    // 0 - грустный, 100 - очень счастлив
     int energy = 80;       // 0 - без сил, 100 - полон сил
@@ -106,19 +139,69 @@ int main()
     int cleanliness = 80;  // 0 - очень грязный, 100 - чистый
     int age = 0;           // возраст в днях
 
-    // ---------- Рождение питомца ----------
-    cout << endl;
-    cout << "Поздравляем! У вас родился цифровой питомец!" << endl;
-    cout << "Его зовут - " << petName << "!" << endl;
-    cout << "Давайте позаботимся о нем." << endl;
-    cout << "Цель: помогите ему дожить до " << DAYS_TO_GROW_UP << " дней и вырасти." << endl;
+    // ---------- Есть ли сохранённая игра? ----------
+    bool loaded = false; // станет true, если игру загрузили из файла
 
-    bool wantExit = false; // станет true, если игрок выберет "Выйти"
+    ifstream saveIn(SAVE_FILE);
+    if (saveIn.is_open()) {
+        cout << "Найдена сохранённая игра. Продолжить? (1 - да, 2 - нет): ";
+        int answer;
+        cin >> answer;
+        // Убираем из ввода всё до конца строки, чтобы потом сработал getline
+        cin.clear();
+        cin.ignore(10000, '\n');
+
+        if (answer == 1) {
+            // Читаем данные в том же порядке, в каком сохраняли
+            getline(saveIn, petName);
+            saveIn >> hunger >> happiness >> energy >> health >> cleanliness >> age;
+
+            if (saveIn.fail()) {
+                cout << "Сохранение повреждено, начинаем новую игру." << endl;
+                petName = "Бобик";
+                hunger = 50;
+                happiness = 50;
+                energy = 80;
+                health = 100;
+                cleanliness = 80;
+                age = 0;
+            }
+            else {
+                loaded = true;
+            }
+        }
+    }
+    saveIn.close();
+
+    if (loaded == true) {
+        cout << endl;
+        cout << "С возвращением! " << petName << " скучал по вам." << endl;
+    }
+    else {
+        // ---------- Задание "ввести имя" ----------
+        cout << "Как вы назовёте своего питомца? ";
+        string inputName;
+        getline(cin, inputName);
+
+        // Если пользователь ничего не ввёл - остаётся имя по умолчанию
+        if (inputName != "") {
+            petName = inputName;
+        }
+
+        // ---------- Рождение питомца ----------
+        cout << endl;
+        cout << "Поздравляем! У вас родился цифровой питомец!" << endl;
+        cout << "Его зовут - " << petName << "!" << endl;
+        cout << "Давайте позаботимся о нем." << endl;
+        cout << "Цель: помогите ему дожить до " << DAYS_TO_GROW_UP << " дней и вырасти." << endl;
+    }
+
+    bool paused = false; // станет true, если игрок поставит игру на паузу
 
     // ---------- Главный цикл игры ----------
-    // Игра идёт, пока питомец жив, ещё не вырос и игрок не вышел
+    // Игра идёт, пока питомец жив, ещё не вырос и игрок не нажал паузу
     while (hunger < 100 && happiness > 0 && health > 0
-           && age < DAYS_TO_GROW_UP && wantExit == false)
+           && age < DAYS_TO_GROW_UP && paused == false)
     {
         showStatus(petName, hunger, happiness, energy, health, cleanliness, age);
         showMenu();
@@ -173,7 +256,7 @@ int main()
             cout << "Вы сидите и смотрите на " << petName << ". Он смотрит на вас." << endl;
         }
         else if (choice == 0) {
-            wantExit = true;
+            paused = true;
             continue;
         }
         else {
@@ -210,26 +293,40 @@ int main()
         cleanliness = limit(cleanliness);
     }
 
-    // ---------- Итог игры ----------
-    cout << endl;
-    cout << "===============================" << endl;
-    if (wantExit == true) {
-        cout << "Вы вышли из игры. " << petName << " будет ждать вас!" << endl;
+    // ---------- Пауза: сохраняем игру в файл ----------
+    if (paused == true) {
+        ofstream saveOut(SAVE_FILE);
+        saveOut << petName << endl;
+        saveOut << hunger << " " << happiness << " " << energy << " "
+                << health << " " << cleanliness << " " << age << endl;
+        saveOut.close();
+
+        cout << "Игра на паузе и сохранена." << endl;
+        cout << petName << " будет ждать вас! Запустите программу снова, чтобы продолжить." << endl;
+        return 0;
     }
-    else if (hunger >= 100) {
-        cout << "Ой... " << petName << " слишком долго был голодным и убежал искать еду." << endl;
+
+    // ---------- Игра закончилась: сохранение больше не нужно ----------
+    remove(SAVE_FILE.c_str());
+
+    // ---------- Две концовки: поражение или победа ----------
+    if (hunger >= 100) {
+        showDefeat(petName, "слишком долго был голодным и убежал искать еду.");
     }
     else if (happiness <= 0) {
-        cout << "Ой... " << petName << " очень загрустил и ушёл к другому хозяину." << endl;
+        showDefeat(petName, "очень загрустил и ушёл к другому хозяину.");
     }
     else if (health <= 0) {
-        cout << "Ой... " << petName << " тяжело заболел. Ухаживайте лучше в следующий раз." << endl;
+        showDefeat(petName, "тяжело заболел.");
     }
     else {
-        cout << "Ура! " << petName << " вырос и стал взрослым! Вы отличный хозяин!" << endl;
+        showVictory(petName);
     }
-    cout << "Питомец прожил дней: " << age << endl;
-    cout << "===============================" << endl;
+
+    // Итоговые показатели
+    cout << endl;
+    cout << "Итоги игры:" << endl;
+    showStatus(petName, hunger, happiness, energy, health, cleanliness, age);
 
     return 0;
 }
