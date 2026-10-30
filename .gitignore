@@ -1,0 +1,13 @@
+# Собранные программы
+pet
+*.exe
+*.o
+*.out
+build/
+
+# Файлы IDE
+.vs/
+.vscode/
+.idea/
+*.sln
+*.vcxproj*
