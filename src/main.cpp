@@ -89,17 +89,17 @@ void showMenu()
     cout << "Ваш выбор: ";
 }
 
-// Концовка 1: ПОБЕДА
+// Концовка 1: ПОБЕДА (собачка радуется косточке)
 void showVictory(string petName)
 {
     cout << endl;
     cout << "*************************************" << endl;
-    cout << "*              ПОБЕДА!              *" << endl;
+    cout << "*             ГАВ-ГАВ!              *" << endl;
     cout << "*************************************" << endl;
     cout << "        / \\__" << endl;
     cout << "       (    ^\\___" << endl;
-    cout << "       /         O     Гав-гав!" << endl;
-    cout << "      /   (_____/" << endl;
+    cout << "       /         O     o\\_______/o" << endl;
+    cout << "      /   (_____/      o/_______\\o" << endl;
     cout << "     /_____/   U" << endl;
     cout << endl;
     cout << petName << " вырос и стал взрослым!" << endl;
