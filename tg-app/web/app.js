@@ -21,7 +21,8 @@ var petName = "Бобик";
 // true, пока идёт анимация действия (чтобы не нажимали кнопки слишком быстро)
 var busy = false;
 
-// Текущие классы сцены: настроение и действие
+// Текущие классы сцены: стадия роста (скин), настроение и действие
+var stageClassName = "stage-baby";
 var moodClass = "";
 var actionClass = "";
 
@@ -42,6 +43,19 @@ function cppNumber(name) {
 // Функция C++ без параметров, которая возвращает текст
 function cppText(name) {
     return Module.ccall(name, "string", [], []);
+}
+
+// Стадия роста из C++ ("малыш", "подросток", "взрослый") -> класс скина в CSS
+function stageClass(stageName) {
+    if (stageName == "малыш") {
+        return "stage-baby";
+    }
+    else if (stageName == "подросток") {
+        return "stage-teen";
+    }
+    else {
+        return "stage-adult";
+    }
 }
 
 // ---------- Telegram ----------
@@ -232,6 +246,9 @@ function doAction(choice) {
     // Если энергии мало, питомец откажется играть (так решает C++)
     var tooTired = (choice == 2 && cppNumber("getEnergy") < 20);
 
+    // Запоминаем стадию до хода, чтобы заметить, что питомец подрос
+    var stageBefore = cppText("getStageName");
+
     // Главное: ход делает C++
     var text = Module.ccall("doAction", "string", ["number"], [choice]);
     document.getElementById("message").textContent = text;
@@ -243,6 +260,10 @@ function doAction(choice) {
         playAnimation(choice);
     }
     updateScreen();
+
+    if (cppText("getStageName") != stageBefore) {
+        playGrowAnimation();
+    }
 
     // Когда анимация закончится - проверяем, не закончилась ли игра
     setTimeout(function () {
@@ -265,7 +286,9 @@ function doAction(choice) {
 
 function updateScreen() {
     document.getElementById("pet-name").textContent = petName;
-    document.getElementById("pet-stage").textContent = cppText("getStageName");
+    var stageName = cppText("getStageName");
+    document.getElementById("pet-stage").textContent = stageName;
+    stageClassName = stageClass(stageName);
     document.getElementById("pet-day").textContent = cppNumber("getAge");
 
     // Для голода "плохо" - когда число большое, для остальных - когда маленькое
@@ -337,7 +360,8 @@ function setActionClass(name) {
 }
 
 function applySceneClass() {
-    document.getElementById("scene").className = "scene " + moodClass + " " + actionClass;
+    document.getElementById("scene").className =
+        "scene " + stageClassName + " " + moodClass + " " + actionClass;
 }
 
 function setDog(src) {
@@ -417,6 +441,22 @@ function playAnimation(choice) {
     }
 }
 
+// Питомец подрос: щенок увеличивается, вокруг искры
+function playGrowAnimation() {
+    var pet = document.getElementById("pet");
+    var fx = document.getElementById("effects");
+
+    pet.classList.add("grow");
+    setTimeout(function () {
+        pet.classList.remove("grow");
+    }, 1300);
+
+    for (var i = 0; i < 6; i++) {
+        spawn(fx, "✨", "rise", 15 + i * 14, 30, i * 0.1, 1.3);
+    }
+    vibrate("success");
+}
+
 // ---------- Концовки ----------
 
 function showEnding(result) {
@@ -430,6 +470,8 @@ function showEnding(result) {
     if (result == 1) {
         // Победа
         screen.className = "screen victory";
+        // Победа - питомец взрослый
+        document.getElementById("end-scene").className = "scene stage-adult";
         document.getElementById("end-title").textContent = "ГАВ-ГАВ!";
         document.getElementById("end-dog").setAttribute("src", "img/puppy.gif");
         document.getElementById("end-text").textContent =
@@ -447,6 +489,8 @@ function showEnding(result) {
     else {
         // Поражение
         screen.className = "screen defeat";
+        // Поражение - щенок спит в скине той стадии, до которой дожил
+        document.getElementById("end-scene").className = "scene " + stageClassName + " sleeping";
         document.getElementById("end-title").textContent = "ПОРАЖЕНИЕ...";
         document.getElementById("end-dog").setAttribute("src", "img/sleep.gif");
         document.getElementById("end-text").textContent = "Причина: " + cppText("getDefeatReason");

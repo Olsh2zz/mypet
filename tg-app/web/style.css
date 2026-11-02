@@ -64,11 +64,85 @@ body {
     justify-content: center;
 }
 
-.dog {
-    height: 190px;
+/* Щенок вместе с аксессуаром: двигаются как одно целое */
+.pet {
+    position: relative;
     margin-bottom: 6px;
     animation: idle 2.4s ease-in-out infinite;
     transform-origin: bottom center;
+}
+
+.dog {
+    display: block;
+    height: 190px;
+}
+
+/* Аксессуар на голове (бантик, кепка или цилиндр) */
+.accessory {
+    position: absolute;
+    left: 60%;
+    top: -14%;
+    transform: rotate(18deg);
+}
+
+/* Украшение сцены (игрушка или коврик) */
+.decor {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.decor::before {
+    position: absolute;
+}
+
+/* ===== Скины по стадиям роста ===== */
+
+/* Малыш: маленький, розовая комната, бантик и мишка */
+.stage-baby {
+    --scene: #ffe9f0;
+    --scene-floor: #f9cfdc;
+}
+.stage-baby .dog { height: 130px; }
+.stage-baby .accessory::before { content: "🎀"; font-size: 30px; }
+.stage-baby .decor::before { content: "🧸"; font-size: 40px; left: 10%; bottom: 14px; }
+
+/* Подросток: средний, голубая комната, кепка и мячик */
+.stage-teen {
+    --scene: #e3f2ff;
+    --scene-floor: #bcdcf5;
+}
+.stage-teen .dog { height: 160px; }
+.stage-teen .accessory::before { content: "🧢"; font-size: 38px; }
+.stage-teen .decor::before { content: "🎾"; font-size: 30px; left: 12%; bottom: 14px; }
+
+/* Взрослый: большой, тёплая комната, цилиндр и коврик */
+.stage-adult {
+    --scene: #fff3cf;
+    --scene-floor: #f6dfa4;
+}
+.stage-adult .dog { height: 180px; }
+.stage-adult .accessory::before { content: "🎩"; font-size: 46px; }
+.stage-adult .decor::before {
+    content: "";
+    left: 50%;
+    bottom: 4px;
+    width: 240px;
+    height: 30px;
+    margin-left: -120px;
+    border-radius: 50%;
+    background: #d9a35b;
+    opacity: 0.45;
+}
+
+/* Спящий щенок ниже, аксессуар сдвигается на голову */
+.stage-baby.sleeping .dog { height: 90px; }
+.stage-teen.sleeping .dog { height: 110px; }
+.stage-adult.sleeping .dog { height: 130px; }
+.sleeping .accessory {
+    left: 48%;
+    top: -12%;
+    transform: rotate(-10deg);
 }
 
 /* Значок настроения в углу сцены */
@@ -95,31 +169,47 @@ body {
 /* ===== Состояния собачки (класс у сцены) ===== */
 .scene.sad .dog {
     filter: saturate(0.3) brightness(0.95);
+}
+.scene.sad .pet {
     animation-duration: 4s;
 }
 
 .scene.sick .dog {
     filter: saturate(0.5) hue-rotate(40deg);
+}
+.scene.sick .pet {
     animation: shiver 0.5s linear infinite;
 }
 
-.scene.tired .dog {
+.scene.tired .pet {
     animation-duration: 4.5s;
 }
 
 .scene.sleeping .dog {
-    height: 130px;
     filter: none;
+}
+.scene.sleeping .pet {
     animation: breathe 3s ease-in-out infinite;
 }
 
+/* Переход на новую стадию: щенок "вырастает" */
+#pet.grow {
+    animation: grow 1.2s ease-out;
+}
+
 /* ===== Анимации действий ===== */
-.scene.act-feed .dog { animation: nod 0.4s ease-in-out 4; }
-.scene.act-play .dog { animation: jump 0.5s ease-out 3; }
-.scene.act-bath .dog { animation: shake 0.15s linear 10; }
-.scene.act-heal .dog { animation: nod 0.6s ease-in-out 2; }
-.scene.act-sit .dog  { animation: idle 1s ease-in-out 2; }
-.scene.act-refuse .dog { animation: shake 0.2s linear 4; }
+.scene.act-feed .pet { animation: nod 0.4s ease-in-out 4; }
+.scene.act-play .pet { animation: jump 0.5s ease-out 3; }
+.scene.act-bath .pet { animation: shake 0.15s linear 10; }
+.scene.act-heal .pet { animation: nod 0.6s ease-in-out 2; }
+.scene.act-sit .pet  { animation: idle 1s ease-in-out 2; }
+.scene.act-refuse .pet { animation: shake 0.2s linear 4; }
+
+@keyframes grow {
+    0% { transform: scale(0.7); }
+    60% { transform: scale(1.15); }
+    100% { transform: scale(1); }
+}
 
 @keyframes idle {
     0%, 100% { transform: rotate(-2deg); }
@@ -334,13 +424,15 @@ input {
     margin: 16px 0 0;
 }
 
-#screen-end.victory .dog {
+#screen-end.victory .pet {
     animation: jump 0.9s ease-out infinite;
 }
 
 #screen-end.defeat .dog {
-    height: 130px;
     filter: grayscale(1);
+}
+
+#screen-end.defeat .pet {
     animation: breathe 3s ease-in-out infinite;
 }
 
