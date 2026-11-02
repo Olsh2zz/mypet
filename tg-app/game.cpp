@@ -69,7 +69,7 @@ void newGame()
     health = 100;
     cleanliness = 80;
     age = 0;
-    message = "Поздравляем! У вас родился цифровой питомец!";
+    message = "У вас родился цифровой питомец!";
 }
 
 void setName(const char* name)

@@ -184,7 +184,7 @@ function startNewGame() {
     vibrate("light");
     showScreen("screen-game");
     document.getElementById("message").textContent =
-        "Поздравляем! У вас родился цифровой питомец! Его зовут - " + petName + "!";
+        "У вас родился цифровой питомец! Его зовут - " + petName + "!";
     updateScreen();
     saveGame();
 }
