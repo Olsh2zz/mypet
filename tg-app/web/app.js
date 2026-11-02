@@ -373,8 +373,8 @@ function playAnimation(choice) {
     if (choice == 1) {
         // Покормить: подъезжает миска, щенок кивает
         setActionClass("act-feed");
-        spawn(fx, "🥣", "slide-in", 22, 10, 0, 1.5);
-        spawn(fx, "🍖", "rise", 30, 40, 0.3, 1.2);
+        spawn(fx, "🥣", "slide-in-right", 72, 10, 0, 1.5);
+        spawn(fx, "🍖", "rise", 74, 40, 0.3, 1.2);
     }
     else if (choice == 2) {
         // Поиграть: щенок прыгает, летает мячик
