@@ -18,6 +18,10 @@ var SAVE_KEY = "pet_save";
 // Имя питомца (запоминаем, чтобы сохранять его вместе с игрой)
 var petName = "Бобик";
 
+// Длительность анимаций в миллисекундах
+var ACTION_TIME = 1600;
+var LONG_ACTION_TIME = 3000; // сон и купание длятся дольше
+
 // true, пока идёт анимация действия (чтобы не нажимали кнопки слишком быстро)
 var busy = false;
 
@@ -244,6 +248,12 @@ function doAction(choice) {
     }
     updateScreen();
 
+    // Сон и купание длятся дольше остальных действий
+    var animationTime = ACTION_TIME;
+    if (!tooTired && (choice == 3 || choice == 4)) {
+        animationTime = LONG_ACTION_TIME;
+    }
+
     // Когда анимация закончится - проверяем, не закончилась ли игра
     setTimeout(function () {
         busy = false;
@@ -258,7 +268,7 @@ function doAction(choice) {
             deleteSave();
             showEnding(result);
         }
-    }, 1600);
+    }, animationTime);
 }
 
 // ---------- Обновление экрана ----------
@@ -366,6 +376,40 @@ function spawn(container, emoji, animation, left, bottom, delay, duration) {
     }, (delay + duration) * 1000 + 100);
 }
 
+// Ванна с пеной для купания (рисуется в CSS)
+function makeBath(container) {
+    var tub = document.createElement("div");
+    tub.className = "tub";
+
+    // Пена: белые шарики по краю ванны
+    for (var i = 0; i < 9; i++) {
+        var foam = document.createElement("div");
+        foam.className = "foam";
+        foam.style.left = (i * 11 - 4) + "%";
+        foam.style.animationDelay = (i * 0.1) + "s";
+        tub.appendChild(foam);
+    }
+
+    container.appendChild(tub);
+
+    // Убираем ванну, когда она улетела
+    setTimeout(function () {
+        tub.remove();
+    }, LONG_ACTION_TIME);
+}
+
+// Лежанка для сна (рисуется в CSS)
+function makeBed(container) {
+    var bed = document.createElement("div");
+    bed.className = "bed";
+    container.appendChild(bed);
+
+    // Убираем лежанку, когда она уехала
+    setTimeout(function () {
+        bed.remove();
+    }, LONG_ACTION_TIME);
+}
+
 function playAnimation(choice) {
     var fx = document.getElementById("effects");
     var i;
@@ -377,32 +421,39 @@ function playAnimation(choice) {
         spawn(fx, "🍖", "rise", 74, 40, 0.3, 1.2);
     }
     else if (choice == 2) {
-        // Поиграть: щенок прыгает, летает мячик
+        // Поиграть: щенок прыгает, справа прилетает мячик
         setActionClass("act-play");
         spawn(fx, "🎾", "bounce-ball", 45, 40, 0, 1.4);
-        spawn(fx, "💛", "rise", 60, 120, 0.4, 1.1);
+        spawn(fx, "💛", "rise", 70, 120, 0.4, 1.1);
     }
     else if (choice == 3) {
-        // Спать: щенок сворачивается, летят Zzz
-        setDog("img/sleep.gif");
-        setActionClass("sleeping");
-        for (i = 0; i < 3; i++) {
-            spawn(fx, "💤", "rise", 60 + i * 6, 110, i * 0.4, 1.2);
-        }
+        // Спать: справа подъезжает лежанка, щенок ложится и засыпает
+        makeBed(fx);
+        setActionClass("lying-down");
+        setTimeout(function () {
+            setDog("img/sleep.gif");
+            setActionClass("sleeping");
+            for (var j = 0; j < 4; j++) {
+                spawn(fx, "💤", "rise", 62 + j * 6, 130, j * 0.4, 1.2);
+            }
+        }, 500);
     }
     else if (choice == 4) {
-        // Искупать: щенок трясётся, поднимаются пузырьки
-        setActionClass("act-bath");
-        for (i = 0; i < 8; i++) {
-            spawn(fx, "🫧", "rise", 20 + i * 8, 20, i * 0.12, 1.2);
-        }
+        // Искупать: справа подлетает ванна, щенок забирается в неё и моется в пене
+        makeBath(fx);
+        setTimeout(function () {
+            setActionClass("act-bath");
+            for (var j = 0; j < 12; j++) {
+                spawn(fx, "🫧", "rise", 25 + (j % 6) * 9, 70, j * 0.15, 1.2);
+            }
+        }, 500);
     }
     else if (choice == 5) {
-        // Полечить: шприц и сердечки
+        // Полечить: справа прилетает шприц, появляются сердечки
         setActionClass("act-heal");
-        spawn(fx, "💉", "slide-in", 25, 90, 0, 1.4);
+        spawn(fx, "💉", "slide-in-right", 70, 90, 0, 1.4);
         for (i = 0; i < 4; i++) {
-            spawn(fx, "❤️", "rise", 40 + i * 8, 100, 0.3 + i * 0.2, 1.1);
+            spawn(fx, "❤️", "rise", 55 + i * 8, 100, 0.3 + i * 0.2, 1.1);
         }
     }
     else if (choice == 6) {
