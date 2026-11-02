@@ -1,43 +1,37 @@
-// =============================================================
-//  Цифровой питомец — логика игры для Telegram Mini App
+// Логика игры для версии в Telegram. Правила те же, что в src/main.cpp.
+// Emscripten собирает этот файл в WebAssembly, а рисует всё app.js.
 //
-//  Правила те же, что в консольной версии (src/main.cpp).
-//  Этот файл компилируется в WebAssembly (через Emscripten),
-//  а кнопки и картинки рисует JavaScript в папке web/.
-//
-//  extern "C" означает: "оставь имена функций как есть",
-//  чтобы JavaScript мог найти их по имени, например "doAction".
-// =============================================================
+// extern "C" нужен, чтобы имена функций не искажались при компиляции
+// и JavaScript мог вызвать их как "doAction", "getHunger" и т.д.
 
 #include <string>
 
 using namespace std;
 
-// Минимальное и максимальное значение для всех шкал
+// границы для всех шкал
 const int MIN_VALUE = 0;
 const int MAX_VALUE = 100;
 
-// Сколько дней нужно прожить, чтобы питомец вырос (победа)
+// столько дней надо продержаться, чтобы победить
 const int DAYS_TO_GROW_UP = 30;
 
-// Результат игры
-const int GAME_GOING = 0;   // игра идёт
-const int GAME_VICTORY = 1; // победа
-const int GAME_DEFEAT = 2;  // поражение
+// что возвращает getResult()
+const int GAME_GOING = 0;
+const int GAME_VICTORY = 1;
+const int GAME_DEFEAT = 2;
 
-// ---------- Показатели питомца ----------
 string petName = "Бобик";
-int hunger = 50;       // 0 - сыт, 100 - очень голоден
-int happiness = 50;    // 0 - грустный, 100 - очень счастлив
-int energy = 80;       // 0 - без сил, 100 - полон сил
-int health = 100;      // 0 - тяжело болен, 100 - здоров
-int cleanliness = 80;  // 0 - очень грязный, 100 - чистый
-int age = 0;           // возраст в днях
+int hunger = 50;       // 0 сыт, 100 очень голоден
+int happiness = 50;
+int energy = 80;
+int health = 100;
+int cleanliness = 80;
+int age = 0;           // в днях
 
-// Последнее сообщение для игрока (его покажет JavaScript)
+// текст для игрока, его выводит app.js
 string message = "";
 
-// Функция не даёт показателю выйти за границы 0..100
+// обрезает значение до 0..100
 int limit(int value)
 {
     if (value < MIN_VALUE) {
@@ -49,7 +43,7 @@ int limit(int value)
     return value;
 }
 
-// Функция возвращает стадию роста питомца по его возрасту
+// малыш, подросток или взрослый, смотря сколько дней прожил
 string getStage(int days)
 {
     if (days < 10) {
@@ -63,10 +57,10 @@ string getStage(int days)
     }
 }
 
-// ---------- Функции, которые вызывает JavaScript ----------
+// дальше функции, которые вызывает app.js
 extern "C" {
 
-// Начать новую игру: все показатели как при рождении
+// всё как при рождении
 void newGame()
 {
     hunger = 50;
@@ -78,7 +72,6 @@ void newGame()
     message = "Поздравляем! У вас родился цифровой питомец!";
 }
 
-// Задать имя питомца
 void setName(const char* name)
 {
     petName = name;
@@ -87,7 +80,7 @@ void setName(const char* name)
     }
 }
 
-// Загрузить сохранённую игру
+// продолжить сохранённую игру
 void loadGame(int savedHunger, int savedHappiness, int savedEnergy,
               int savedHealth, int savedCleanliness, int savedAge)
 {
@@ -100,7 +93,6 @@ void loadGame(int savedHunger, int savedHappiness, int savedEnergy,
     message = "С возвращением! " + petName + " скучал по вам.";
 }
 
-// Узнать, чем закончилась игра
 int getResult()
 {
     if (hunger >= 100 || happiness <= 0 || health <= 0) {
@@ -112,16 +104,15 @@ int getResult()
     return GAME_GOING;
 }
 
-// Сделать действие (1..6, как в меню консольной версии).
-// Возвращает текст, который нужно показать игроку.
+// один ход, choice от 1 до 6 как в меню консольной версии.
+// возвращает текст для игрока
 const char* doAction(int choice)
 {
-    // Если игра уже закончилась, ничего не делаем
+    // игра уже кончилась
     if (getResult() != GAME_GOING) {
         return message.c_str();
     }
 
-    // ---------- Обрабатываем выбор ----------
     if (choice == 1) {
         message = "Вы покормили " + petName + "! Он доволен.";
         hunger -= 30;
@@ -162,14 +153,14 @@ const char* doAction(int choice)
         return message.c_str();
     }
 
-    // ---------- Прошёл один день ----------
+    // прошёл день
     age += 1;
-    hunger += 5;       // питомец понемногу голодает
-    happiness -= 5;    // и скучает
-    energy -= 5;       // и устаёт
-    cleanliness -= 5;  // и пачкается
+    hunger += 5;
+    happiness -= 5;
+    energy -= 5;
+    cleanliness -= 5;
 
-    // Если за питомцем плохо ухаживать, он начинает болеть
+    // от плохого ухода он болеет
     if (hunger > 80) {
         message += "\n" + petName + " очень голоден, ему становится плохо!";
         health -= 10;
@@ -183,7 +174,6 @@ const char* doAction(int choice)
         health -= 5;
     }
 
-    // Показатели не выходят за границы 0..100
     hunger = limit(hunger);
     happiness = limit(happiness);
     energy = limit(energy);
@@ -193,7 +183,7 @@ const char* doAction(int choice)
     return message.c_str();
 }
 
-// Причина поражения (пустая строка, если поражения нет)
+// почему проиграли (пусто, если не проиграли)
 const char* getDefeatReason()
 {
     if (hunger >= 100) {
@@ -211,16 +201,15 @@ const char* getDefeatReason()
     return message.c_str();
 }
 
-// Стадия роста: малыш, подросток или взрослый
 const char* getStageName()
 {
-    // static - строка живёт и после выхода из функции
+    // static, чтобы строка не пропала после return
     static string stage;
     stage = getStage(age);
     return stage.c_str();
 }
 
-// Простые функции, чтобы JavaScript мог узнать показатели
+// геттеры для app.js
 int getHunger() { return hunger; }
 int getHappiness() { return happiness; }
 int getEnergy() { return energy; }
@@ -229,4 +218,4 @@ int getCleanliness() { return cleanliness; }
 int getAge() { return age; }
 int getDaysToGrowUp() { return DAYS_TO_GROW_UP; }
 
-} // конец extern "C"
+} // extern "C"

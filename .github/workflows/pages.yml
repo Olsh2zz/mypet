@@ -1,6 +1,5 @@
-# Сборка Telegram Mini App и публикация на GitHub Pages.
-# 1) Emscripten компилирует tg-app/game.cpp в tg-app/web/pet.js
-# 2) Папка tg-app/web выкладывается на https://<логин>.github.io/<репозиторий>/
+# Собирает game.cpp через Emscripten и выкладывает папку tg-app/web
+# на GitHub Pages.
 name: Telegram Mini App
 
 on:
@@ -41,7 +40,7 @@ jobs:
           path: tg-app/web
 
   deploy:
-    # Публикуем только из main
+    # на сайт выкладываем только из main
     if: github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-latest

@@ -1,6 +1,5 @@
-/* ===== Цвета =====
-   Telegram сам подставляет цвета темы в переменные --tg-theme-*.
-   Если открыть страницу в обычном браузере - берутся запасные цвета. */
+/* Telegram сам кладёт цвета темы в --tg-theme-*,
+   в обычном браузере берутся запасные цвета после запятой */
 :root {
     --bg: var(--tg-theme-bg-color, #fffaf0);
     --text: var(--tg-theme-text-color, #2b1a28);
@@ -52,7 +51,6 @@ body {
     margin: 12px 0 8px;
 }
 
-/* ===== Сцена с собачкой ===== */
 .scene {
     position: relative;
     height: 220px;
@@ -71,7 +69,6 @@ body {
     transform-origin: bottom center;
 }
 
-/* Значок настроения в углу сцены */
 .mood {
     position: absolute;
     top: 12px;
@@ -80,7 +77,7 @@ body {
     animation: float 2s ease-in-out infinite;
 }
 
-/* Слой для летающих предметов */
+/* сюда app.js кидает летающие эмодзи */
 .effects {
     position: absolute;
     inset: 0;
@@ -92,7 +89,7 @@ body {
     font-size: 30px;
 }
 
-/* ===== Состояния собачки (класс у сцены) ===== */
+/* настроение, класс вешается на сцену */
 .scene.sad .dog {
     filter: saturate(0.3) brightness(0.95);
     animation-duration: 4s;
@@ -114,19 +111,17 @@ body {
     animation: settle 0.4s ease-out, breathe 3s ease-in-out 0.4s infinite;
 }
 
-/* Щенок ложится: опускается и прижимается к полу */
 .scene.lying-down .dog {
     animation: lie-down 0.5s ease-in forwards;
 }
 
-/* ===== Анимации действий ===== */
 .scene.act-feed .dog { animation: nod 0.4s ease-in-out 4; }
 .scene.act-play .dog { animation: jump 0.5s ease-out 3; }
 .scene.act-heal .dog { animation: nod 0.6s ease-in-out 2; }
 .scene.act-sit .dog  { animation: idle 1s ease-in-out 2; }
 .scene.act-refuse .dog { animation: shake 0.2s linear 4; }
 
-/* Купание: щенок сидит в ванне и моется (над пеной видна мордочка) */
+/* щенок поднят, чтобы мордочка торчала из пены */
 .scene.act-bath .dog {
     height: 150px;
     margin-bottom: 30px;
@@ -134,7 +129,6 @@ body {
     animation: wash 0.6s ease-in-out infinite;
 }
 
-/* ===== Лежанка для сна ===== */
 .bed {
     position: absolute;
     left: 50%;
@@ -157,7 +151,6 @@ body {
     to { transform: scale(1); }
 }
 
-/* ===== Ванна с пеной ===== */
 .tub {
     position: absolute;
     left: 50%;
@@ -171,7 +164,7 @@ body {
     animation: tub-in 3s ease-in-out both;
 }
 
-/* Ножки ванны */
+/* ножки */
 .tub::before,
 .tub::after {
     content: "";
@@ -186,7 +179,6 @@ body {
 .tub::before { left: 30px; }
 .tub::after { right: 30px; }
 
-/* Пена на краю ванны */
 .foam {
     position: absolute;
     top: -24px;
@@ -203,7 +195,7 @@ body {
     50% { transform: rotate(4deg); }
 }
 
-/* Ванна подлетает справа и улетает обратно */
+/* ванна и лежанка заезжают справа и потом уезжают */
 @keyframes tub-in {
     0% { transform: translateX(300px); opacity: 1; }
     15%, 88% { transform: translateX(0); opacity: 1; }
@@ -251,34 +243,29 @@ body {
     50% { transform: translateY(-6px); }
 }
 
-/* Предметы: появляются снизу и улетают вверх */
 @keyframes rise {
     0% { transform: translateY(0) scale(0.6); opacity: 0; }
     20% { opacity: 1; }
     100% { transform: translateY(-160px) scale(1.1); opacity: 0; }
 }
 
-/* Миска с едой подъезжает справа */
 @keyframes slide-in-right {
     0% { transform: translateX(120px); opacity: 0; }
     30%, 80% { transform: translateX(0); opacity: 1; }
     100% { transform: translateX(0); opacity: 0; }
 }
 
-/* Мячик прилетает справа дугой */
 @keyframes bounce-ball {
     0% { transform: translate(160px, 0); }
     50% { transform: translate(0, -120px); }
     100% { transform: translate(-100px, 0); opacity: 0; }
 }
 
-/* Конфетти падает сверху */
 @keyframes fall {
     0% { transform: translateY(-40px) rotate(0); opacity: 1; }
     100% { transform: translateY(260px) rotate(360deg); opacity: 0.2; }
 }
 
-/* ===== Шапка игры ===== */
 .top {
     display: flex;
     justify-content: space-between;
@@ -301,18 +288,16 @@ body {
     padding: 8px 12px;
 }
 
-/* ===== Сообщение ===== */
 .message {
     background: var(--card);
     border-radius: 16px;
     padding: 12px 14px;
     margin: 12px 0;
     min-height: 48px;
-    white-space: pre-line; /* \n из C++ превращается в перенос строки */
+    white-space: pre-line; /* чтобы работали \n из C++ */
     line-height: 1.35;
 }
 
-/* ===== Полоски показателей ===== */
 .bar {
     display: flex;
     align-items: center;
@@ -351,7 +336,6 @@ body {
     font-variant-numeric: tabular-nums;
 }
 
-/* ===== Кнопки ===== */
 .actions {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -421,7 +405,6 @@ input {
     user-select: text;
 }
 
-/* ===== Концовка ===== */
 .end-text {
     text-align: center;
     font-size: 17px;
@@ -438,7 +421,6 @@ input {
     animation: breathe 3s ease-in-out infinite;
 }
 
-/* Косточка на экране победы */
 .bone {
     left: 12%;
     bottom: 14px;
@@ -446,7 +428,7 @@ input {
     animation: float 1.5s ease-in-out infinite;
 }
 
-/* ===== Подпись Icons8 ===== */
+/* Icons8 просит подписывать их картинки */
 .credits {
     text-align: center;
     color: var(--hint);

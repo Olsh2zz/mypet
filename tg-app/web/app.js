@@ -1,61 +1,48 @@
-// =============================================================
-//  Цифровой питомец — интерфейс Telegram Mini App
-//
-//  Вся логика игры (показатели, правила, концовки) написана на C++
-//  в файле game.cpp. Здесь только кнопки, картинки и анимации.
-//  Функции C++ вызываются через Module.ccall("имяФункции", ...).
-// =============================================================
+// Интерфейс для Telegram. Сама игра считается в game.cpp,
+// тут только кнопки и анимации. C++ вызывается через Module.ccall.
 
-// Объект Telegram (если страница открыта не в Telegram - его может не быть)
+// вне Telegram этого объекта может не быть
 var tg = null;
 if (window.Telegram && window.Telegram.WebApp) {
     tg = window.Telegram.WebApp;
 }
 
-// Ключ, под которым хранится сохранённая игра
 var SAVE_KEY = "pet_save";
 
-// Имя питомца (запоминаем, чтобы сохранять его вместе с игрой)
+// имя храним тут, чтобы класть его в сохранение
 var petName = "Бобик";
 
-// Длительность анимаций в миллисекундах
+// сколько длятся анимации, мс
 var ACTION_TIME = 1600;
-var LONG_ACTION_TIME = 3000; // сон и купание длятся дольше
+var LONG_ACTION_TIME = 3000; // сон и купание
 
-// true, пока идёт анимация действия (чтобы не нажимали кнопки слишком быстро)
+// пока идёт анимация, новые нажатия игнорируем
 var busy = false;
 
-// Текущие классы сцены: настроение и действие
 var moodClass = "";
 var actionClass = "";
 
-// pet.js (собранный C++) сам вызовет эту функцию, когда загрузится
+// pet.js вызовет это, когда C++ загрузится
 var Module = {
     onRuntimeInitialized: function () {
         onCppReady();
     }
 };
 
-// ---------- Вызовы функций C++ ----------
-
-// Функция C++ без параметров, которая возвращает число
+// функции C++ без параметров: одна возвращает число, другая строку
 function cppNumber(name) {
     return Module.ccall(name, "number", [], []);
 }
 
-// Функция C++ без параметров, которая возвращает текст
 function cppText(name) {
     return Module.ccall(name, "string", [], []);
 }
 
-// ---------- Telegram ----------
-
-// Открыта ли страница внутри Telegram
+// в браузере initData пустая
 function inTelegram() {
     return tg != null && tg.initData != "";
 }
 
-// Короткая вибрация при нажатии
 function vibrate(type) {
     if (inTelegram() && tg.isVersionAtLeast("6.1")) {
         if (type == "success" || type == "error") {
@@ -67,14 +54,12 @@ function vibrate(type) {
     }
 }
 
-// Облачное хранилище Telegram есть с версии 6.9
+// CloudStorage появился в Telegram 6.9
 function canUseCloud() {
     return inTelegram() && tg.isVersionAtLeast("6.9");
 }
 
-// ---------- Сохранение ----------
-// В Telegram игра сохраняется в облако (привязано к аккаунту),
-// в обычном браузере - в localStorage.
+// В Telegram сохраняем в облако, в браузере в localStorage.
 
 function saveGame() {
     var data = {
@@ -95,12 +80,12 @@ function saveGame() {
         try {
             localStorage.setItem(SAVE_KEY, text);
         } catch (e) {
-            // хранилище недоступно - просто играем без сохранения
+            // нет хранилища, играем без сохранения
         }
     }
 }
 
-// Прочитать сохранение. Ответ придёт в функцию callback (текст или "")
+// облако отвечает не сразу, поэтому через callback. Пусто, если сохранения нет
 function loadSave(callback) {
     if (canUseCloud()) {
         tg.CloudStorage.getItem(SAVE_KEY, function (error, value) {
@@ -131,12 +116,10 @@ function deleteSave() {
         try {
             localStorage.removeItem(SAVE_KEY);
         } catch (e) {
-            // ничего страшного
         }
     }
 }
 
-// ---------- Экраны ----------
 
 function showScreen(id) {
     document.getElementById("screen-start").classList.add("hidden");
@@ -145,7 +128,6 @@ function showScreen(id) {
     document.getElementById(id).classList.remove("hidden");
 }
 
-// ---------- Запуск ----------
 
 function onCppReady() {
     if (tg != null) {
@@ -155,7 +137,6 @@ function onCppReady() {
 
     document.getElementById("days-total").textContent = cppNumber("getDaysToGrowUp");
 
-    // Кнопки стартового экрана
     document.getElementById("btn-start").onclick = startNewGame;
     document.getElementById("btn-continue").onclick = continueGame;
     document.getElementById("btn-new").onclick = function () {
@@ -169,7 +150,7 @@ function onCppReady() {
         showScreen("screen-start");
     };
 
-    // Кнопки действий: номер действия записан в data-action
+    // номер действия лежит в data-action
     var buttons = document.querySelectorAll(".action");
     for (var i = 0; i < buttons.length; i++) {
         buttons[i].onclick = function () {
@@ -177,7 +158,6 @@ function onCppReady() {
         };
     }
 
-    // Есть ли сохранённая игра?
     loadSave(function (text) {
         if (text == "") {
             return;
@@ -187,7 +167,7 @@ function onCppReady() {
             data.name + " ждёт вас! День " + data.age + ".";
         document.getElementById("continue-box").classList.remove("hidden");
         document.getElementById("new-box").classList.add("hidden");
-        // Запомним данные, чтобы кнопка "Продолжить" могла их загрузить
+        // пригодится, когда нажмут "Продолжить"
         document.getElementById("btn-continue").saveData = data;
     });
 }
@@ -224,7 +204,6 @@ function continueGame() {
     updateScreen();
 }
 
-// ---------- Ход игры ----------
 
 function doAction(choice) {
     if (busy) {
@@ -233,10 +212,9 @@ function doAction(choice) {
     busy = true;
     vibrate("light");
 
-    // Если энергии мало, питомец откажется играть (так решает C++)
+    // при энергии меньше 20 C++ не даст играть, нужна другая анимация
     var tooTired = (choice == 2 && cppNumber("getEnergy") < 20);
 
-    // Главное: ход делает C++
     var text = Module.ccall("doAction", "string", ["number"], [choice]);
     document.getElementById("message").textContent = text;
 
@@ -248,13 +226,12 @@ function doAction(choice) {
     }
     updateScreen();
 
-    // Сон и купание длятся дольше остальных действий
     var animationTime = ACTION_TIME;
     if (!tooTired && (choice == 3 || choice == 4)) {
         animationTime = LONG_ACTION_TIME;
     }
 
-    // Когда анимация закончится - проверяем, не закончилась ли игра
+    // после анимации проверяем, не конец ли игры
     setTimeout(function () {
         busy = false;
         setActionClass("");
@@ -271,14 +248,13 @@ function doAction(choice) {
     }, animationTime);
 }
 
-// ---------- Обновление экрана ----------
 
 function updateScreen() {
     document.getElementById("pet-name").textContent = petName;
     document.getElementById("pet-stage").textContent = cppText("getStageName");
     document.getElementById("pet-day").textContent = cppNumber("getAge");
 
-    // Для голода "плохо" - когда число большое, для остальных - когда маленькое
+    // у голода плохо, когда много, у остальных, когда мало
     updateBar("bar-hunger", cppNumber("getHunger"), true);
     updateBar("bar-happiness", cppNumber("getHappiness"), false);
     updateBar("bar-energy", cppNumber("getEnergy"), false);
@@ -293,7 +269,6 @@ function updateBar(id, value, highIsBad) {
     bar.querySelector(".bar-fill").style.width = value + "%";
     bar.querySelector(".bar-value").textContent = value;
 
-    // Насколько всё плохо: считаем "уровень опасности" от 0 до 100
     var danger = 100 - value;
     if (highIsBad) {
         danger = value;
@@ -309,7 +284,7 @@ function updateBar(id, value, highIsBad) {
     }
 }
 
-// Настроение собачки: значок в углу и вид анимации
+// значок в углу сцены и как щенок двигается
 function updateMood() {
     var icon = "";
     moodClass = "";
@@ -352,15 +327,13 @@ function applySceneClass() {
 
 function setDog(src) {
     var dog = document.getElementById("dog");
-    // Меняем картинку, только если она другая (иначе GIF начнётся сначала)
+    // если подставить тот же src, GIF начнётся сначала
     if (dog.getAttribute("src") != src) {
         dog.setAttribute("src", src);
     }
 }
 
-// ---------- Анимации действий ----------
-
-// Создать летающий предмет (эмодзи) на сцене
+// летающий эмодзи на сцене
 function spawn(container, emoji, animation, left, bottom, delay, duration) {
     var p = document.createElement("div");
     p.className = "particle";
@@ -370,18 +343,16 @@ function spawn(container, emoji, animation, left, bottom, delay, duration) {
     p.style.animation = animation + " " + duration + "s ease-out " + delay + "s both";
     container.appendChild(p);
 
-    // Убираем предмет, когда он улетел
     setTimeout(function () {
         p.remove();
     }, (delay + duration) * 1000 + 100);
 }
 
-// Ванна с пеной для купания (рисуется в CSS)
+// ванна нарисована в CSS, пена из белых кружков
 function makeBath(container) {
     var tub = document.createElement("div");
     tub.className = "tub";
 
-    // Пена: белые шарики по краю ванны
     for (var i = 0; i < 9; i++) {
         var foam = document.createElement("div");
         foam.className = "foam";
@@ -392,19 +363,16 @@ function makeBath(container) {
 
     container.appendChild(tub);
 
-    // Убираем ванну, когда она улетела
     setTimeout(function () {
         tub.remove();
     }, LONG_ACTION_TIME);
 }
 
-// Лежанка для сна (рисуется в CSS)
 function makeBed(container) {
     var bed = document.createElement("div");
     bed.className = "bed";
     container.appendChild(bed);
 
-    // Убираем лежанку, когда она уехала
     setTimeout(function () {
         bed.remove();
     }, LONG_ACTION_TIME);
@@ -415,19 +383,19 @@ function playAnimation(choice) {
     var i;
 
     if (choice == 1) {
-        // Покормить: подъезжает миска, щенок кивает
+        // покормить
         setActionClass("act-feed");
         spawn(fx, "🥣", "slide-in-right", 72, 10, 0, 1.5);
         spawn(fx, "🍖", "rise", 74, 40, 0.3, 1.2);
     }
     else if (choice == 2) {
-        // Поиграть: щенок прыгает, справа прилетает мячик
+        // поиграть
         setActionClass("act-play");
         spawn(fx, "🎾", "bounce-ball", 45, 40, 0, 1.4);
         spawn(fx, "💛", "rise", 70, 120, 0.4, 1.1);
     }
     else if (choice == 3) {
-        // Спать: справа подъезжает лежанка, щенок ложится и засыпает
+        // спать: подъезжает лежанка, щенок ложится, через полсекунды засыпает
         makeBed(fx);
         setActionClass("lying-down");
         setTimeout(function () {
@@ -439,7 +407,7 @@ function playAnimation(choice) {
         }, 500);
     }
     else if (choice == 4) {
-        // Искупать: справа подлетает ванна, щенок забирается в неё и моется в пене
+        // купание: ванна успевает подъехать, потом щенок в пене
         makeBath(fx);
         setTimeout(function () {
             setActionClass("act-bath");
@@ -449,7 +417,7 @@ function playAnimation(choice) {
         }, 500);
     }
     else if (choice == 5) {
-        // Полечить: справа прилетает шприц, появляются сердечки
+        // полечить
         setActionClass("act-heal");
         spawn(fx, "💉", "slide-in-right", 70, 90, 0, 1.4);
         for (i = 0; i < 4; i++) {
@@ -457,18 +425,16 @@ function playAnimation(choice) {
         }
     }
     else if (choice == 6) {
-        // Посидеть рядом
         setActionClass("act-sit");
         spawn(fx, "🙂", "rise", 65, 140, 0, 1.4);
     }
     else {
-        // Отказ: щенок мотает головой
+        // устал и не хочет играть
         setActionClass("act-refuse");
         spawn(fx, "🥱", "rise", 62, 140, 0, 1.4);
     }
 }
 
-// ---------- Концовки ----------
 
 function showEnding(result) {
     var screen = document.getElementById("screen-end");
@@ -479,13 +445,11 @@ function showEnding(result) {
     document.getElementById("end-days").textContent = "Питомец прожил дней: " + cppNumber("getAge");
 
     if (result == 1) {
-        // Победа
         screen.className = "screen victory";
         document.getElementById("end-title").textContent = "ГАВ-ГАВ!";
         document.getElementById("end-dog").setAttribute("src", "img/puppy.gif");
         document.getElementById("end-text").textContent =
             petName + " вырос и стал взрослым! Вы отличный хозяин!";
-        // Косточка лежит рядом с собачкой
         var bone = document.createElement("div");
         bone.className = "particle bone";
         bone.textContent = "🦴";
@@ -496,7 +460,6 @@ function showEnding(result) {
         vibrate("success");
     }
     else {
-        // Поражение
         screen.className = "screen defeat";
         document.getElementById("end-title").textContent = "ПОРАЖЕНИЕ...";
         document.getElementById("end-dog").setAttribute("src", "img/sleep.gif");
