@@ -13,12 +13,8 @@
     <!-- ========== Экран 1: старт ========== -->
     <section id="screen-start" class="screen">
         <h1 class="title">Цифровой питомец</h1>
-        <div class="scene stage-baby">
-            <div class="decor"></div>
-            <div class="pet">
-                <img class="dog" src="img/puppy.gif" alt="Щенок">
-                <div class="accessory"></div>
-            </div>
+        <div class="scene">
+            <img class="dog" src="img/puppy.gif" alt="Щенок">
         </div>
 
         <!-- Если есть сохранённая игра -->
@@ -48,13 +44,8 @@
             </div>
         </header>
 
-        <!-- Класс stage-baby / stage-teen / stage-adult меняет скин щенка -->
-        <div id="scene" class="scene stage-baby">
-            <div class="decor"></div>
-            <div id="pet" class="pet">
-                <img id="dog" class="dog" src="img/puppy.gif" alt="Питомец">
-                <div class="accessory"></div>
-            </div>
+        <div id="scene" class="scene">
+            <img id="dog" class="dog" src="img/puppy.gif" alt="Питомец">
             <div id="mood" class="mood"></div>
             <!-- сюда app.js добавляет летающие предметы: миску, мяч, пузырьки -->
             <div id="effects" class="effects"></div>
@@ -104,12 +95,8 @@
     <!-- ========== Экран 3: концовка ========== -->
     <section id="screen-end" class="screen hidden">
         <h1 id="end-title" class="title">ГАВ-ГАВ!</h1>
-        <div id="end-scene" class="scene stage-adult">
-            <div class="decor"></div>
-            <div class="pet">
-                <img id="end-dog" class="dog" src="img/puppy.gif" alt="Питомец">
-                <div class="accessory"></div>
-            </div>
+        <div id="end-scene" class="scene">
+            <img id="end-dog" class="dog" src="img/puppy.gif" alt="Питомец">
             <div id="end-effects" class="effects"></div>
         </div>
         <p id="end-text" class="end-text"></p>
