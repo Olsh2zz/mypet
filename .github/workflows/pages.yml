@@ -1,0 +1,54 @@
+# Сборка Telegram Mini App и публикация на GitHub Pages.
+# 1) Emscripten компилирует tg-app/game.cpp в tg-app/web/pet.js
+# 2) Папка tg-app/web выкладывается на https://<логин>.github.io/<репозиторий>/
+name: Telegram Mini App
+
+on:
+  push:
+    branches: [main, tg-mini-app]
+    paths:
+      - "tg-app/**"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Установить Emscripten
+        uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: 3.1.64
+
+      - name: Собрать C++ в WebAssembly
+        working-directory: tg-app
+        run: sh build.sh
+
+      - name: Подготовить сайт
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: tg-app/web
+
+  deploy:
+    # Публикуем только из main
+    if: github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Опубликовать на GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

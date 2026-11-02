@@ -1,0 +1,365 @@
+/* ===== Цвета =====
+   Telegram сам подставляет цвета темы в переменные --tg-theme-*.
+   Если открыть страницу в обычном браузере - берутся запасные цвета. */
+:root {
+    --bg: var(--tg-theme-bg-color, #fffaf0);
+    --text: var(--tg-theme-text-color, #2b1a28);
+    --hint: var(--tg-theme-hint-color, #8a7a86);
+    --card: var(--tg-theme-secondary-bg-color, #f6eddc);
+    --button: var(--tg-theme-button-color, #5b1f4a);
+    --button-text: var(--tg-theme-button-text-color, #ffffff);
+
+    --good: #4caf50;
+    --warn: #f5a623;
+    --bad: #e5484d;
+    --scene: #fff3cf;
+    --scene-floor: #f6dfa4;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 16px 16px 8px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 15px;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.screen {
+    max-width: 480px;
+    margin: 0 auto;
+}
+
+.title {
+    text-align: center;
+    font-size: 26px;
+    margin: 8px 0 16px;
+}
+
+.hint {
+    text-align: center;
+    color: var(--hint);
+    margin: 12px 0 8px;
+}
+
+/* ===== Сцена с собачкой ===== */
+.scene {
+    position: relative;
+    height: 220px;
+    border-radius: 24px;
+    background: linear-gradient(var(--scene) 72%, var(--scene-floor) 72%);
+    overflow: hidden;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.dog {
+    height: 190px;
+    margin-bottom: 6px;
+    animation: idle 2.4s ease-in-out infinite;
+    transform-origin: bottom center;
+}
+
+/* Значок настроения в углу сцены */
+.mood {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    font-size: 30px;
+    animation: float 2s ease-in-out infinite;
+}
+
+/* Слой для летающих предметов */
+.effects {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.particle {
+    position: absolute;
+    font-size: 30px;
+}
+
+/* ===== Состояния собачки (класс у сцены) ===== */
+.scene.sad .dog {
+    filter: saturate(0.3) brightness(0.95);
+    animation-duration: 4s;
+}
+
+.scene.sick .dog {
+    filter: saturate(0.5) hue-rotate(40deg);
+    animation: shiver 0.5s linear infinite;
+}
+
+.scene.tired .dog {
+    animation-duration: 4.5s;
+}
+
+.scene.sleeping .dog {
+    height: 130px;
+    filter: none;
+    animation: breathe 3s ease-in-out infinite;
+}
+
+/* ===== Анимации действий ===== */
+.scene.act-feed .dog { animation: nod 0.4s ease-in-out 4; }
+.scene.act-play .dog { animation: jump 0.5s ease-out 3; }
+.scene.act-bath .dog { animation: shake 0.15s linear 10; }
+.scene.act-heal .dog { animation: nod 0.6s ease-in-out 2; }
+.scene.act-sit .dog  { animation: idle 1s ease-in-out 2; }
+.scene.act-refuse .dog { animation: shake 0.2s linear 4; }
+
+@keyframes idle {
+    0%, 100% { transform: rotate(-2deg); }
+    50% { transform: rotate(2deg); }
+}
+
+@keyframes breathe {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.04, 0.97); }
+}
+
+@keyframes jump {
+    0%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-50px) rotate(-6deg); }
+}
+
+@keyframes nod {
+    0%, 100% { transform: rotate(0); }
+    50% { transform: rotate(8deg) translateY(6px); }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-8px); }
+    75% { transform: translateX(8px); }
+}
+
+@keyframes shiver {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(2px); }
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+}
+
+/* Предметы: появляются снизу и улетают вверх */
+@keyframes rise {
+    0% { transform: translateY(0) scale(0.6); opacity: 0; }
+    20% { opacity: 1; }
+    100% { transform: translateY(-160px) scale(1.1); opacity: 0; }
+}
+
+/* Миска подъезжает сбоку */
+@keyframes slide-in {
+    0% { transform: translateX(-120px); opacity: 0; }
+    30%, 80% { transform: translateX(0); opacity: 1; }
+    100% { transform: translateX(0); opacity: 0; }
+}
+
+/* Мячик летает дугой */
+@keyframes bounce-ball {
+    0% { transform: translate(-140px, 0); }
+    50% { transform: translate(0, -120px); }
+    100% { transform: translate(140px, 0); opacity: 0; }
+}
+
+/* Конфетти падает сверху */
+@keyframes fall {
+    0% { transform: translateY(-40px) rotate(0); opacity: 1; }
+    100% { transform: translateY(260px) rotate(360deg); opacity: 0.2; }
+}
+
+/* ===== Шапка игры ===== */
+.top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.pet-name {
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.pet-stage {
+    color: var(--hint);
+}
+
+.day {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 8px 12px;
+}
+
+/* ===== Сообщение ===== */
+.message {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 12px 14px;
+    margin: 12px 0;
+    min-height: 48px;
+    white-space: pre-line; /* \n из C++ превращается в перенос строки */
+    line-height: 1.35;
+}
+
+/* ===== Полоски показателей ===== */
+.bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 6px 0;
+}
+
+.bar-label {
+    width: 120px;
+    flex-shrink: 0;
+}
+
+.bar-track {
+    flex: 1;
+    height: 10px;
+    background: var(--card);
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.bar-fill {
+    height: 100%;
+    width: 50%;
+    background: var(--good);
+    border-radius: 5px;
+    transition: width 0.4s, background 0.4s;
+}
+
+.bar.warn .bar-fill { background: var(--warn); }
+.bar.bad .bar-fill { background: var(--bad); }
+
+.bar-value {
+    width: 30px;
+    text-align: right;
+    color: var(--hint);
+    font-variant-numeric: tabular-nums;
+}
+
+/* ===== Кнопки ===== */
+.actions {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-top: 14px;
+}
+
+.action {
+    border: none;
+    border-radius: 16px;
+    padding: 10px 4px;
+    background: var(--card);
+    color: var(--text);
+    font-size: 13px;
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+
+.action span {
+    display: block;
+    font-size: 26px;
+    margin-bottom: 2px;
+}
+
+.action:active {
+    transform: scale(0.94);
+}
+
+.action:disabled {
+    opacity: 0.5;
+}
+
+.big-button {
+    display: block;
+    width: 100%;
+    border: none;
+    border-radius: 14px;
+    padding: 14px;
+    margin-top: 12px;
+    background: var(--button);
+    color: var(--button-text);
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.link-button {
+    display: block;
+    margin: 12px auto 0;
+    border: none;
+    background: none;
+    color: var(--hint);
+    font-size: 14px;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+input {
+    display: block;
+    width: 100%;
+    padding: 12px 14px;
+    border: 2px solid var(--card);
+    border-radius: 14px;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 16px;
+    user-select: text;
+}
+
+/* ===== Концовка ===== */
+.end-text {
+    text-align: center;
+    font-size: 17px;
+    margin: 16px 0 0;
+}
+
+#screen-end.victory .dog {
+    animation: jump 0.9s ease-out infinite;
+}
+
+#screen-end.defeat .dog {
+    height: 130px;
+    filter: grayscale(1);
+    animation: breathe 3s ease-in-out infinite;
+}
+
+/* Косточка на экране победы */
+.bone {
+    left: 12%;
+    bottom: 14px;
+    font-size: 44px;
+    animation: float 1.5s ease-in-out infinite;
+}
+
+/* ===== Подпись Icons8 ===== */
+.credits {
+    text-align: center;
+    color: var(--hint);
+    font-size: 11px;
+    margin-top: 16px;
+}
+
+.credits a {
+    color: var(--hint);
+}

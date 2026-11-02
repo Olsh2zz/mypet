@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>Цифровой питомец</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Библиотека Telegram: тема, вибрация, облачное сохранение -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+
+    <!-- ========== Экран 1: старт ========== -->
+    <section id="screen-start" class="screen">
+        <h1 class="title">Цифровой питомец</h1>
+        <div class="scene">
+            <img class="dog" src="img/puppy.gif" alt="Щенок">
+        </div>
+
+        <!-- Если есть сохранённая игра -->
+        <div id="continue-box" class="hidden">
+            <p class="hint" id="continue-text"></p>
+            <button id="btn-continue" class="big-button">Продолжить</button>
+            <button id="btn-new" class="link-button">Начать заново</button>
+        </div>
+
+        <!-- Новая игра -->
+        <div id="new-box">
+            <p class="hint">Как вы назовёте своего питомца?</p>
+            <input id="name-input" type="text" maxlength="20" placeholder="Бобик">
+            <button id="btn-start" class="big-button">Завести питомца</button>
+        </div>
+    </section>
+
+    <!-- ========== Экран 2: игра ========== -->
+    <section id="screen-game" class="screen hidden">
+        <header class="top">
+            <div>
+                <div id="pet-name" class="pet-name">Бобик</div>
+                <div id="pet-stage" class="pet-stage">малыш</div>
+            </div>
+            <div class="day">
+                День <b id="pet-day">0</b>/<span id="days-total">30</span>
+            </div>
+        </header>
+
+        <div id="scene" class="scene">
+            <img id="dog" class="dog" src="img/puppy.gif" alt="Питомец">
+            <div id="mood" class="mood"></div>
+            <!-- сюда app.js добавляет летающие предметы: миску, мяч, пузырьки -->
+            <div id="effects" class="effects"></div>
+        </div>
+
+        <div id="message" class="message">Поздравляем! У вас родился цифровой питомец!</div>
+
+        <div class="bars">
+            <div class="bar" id="bar-hunger">
+                <span class="bar-label">🍖 Голод</span>
+                <div class="bar-track"><div class="bar-fill"></div></div>
+                <span class="bar-value">50</span>
+            </div>
+            <div class="bar" id="bar-happiness">
+                <span class="bar-label">😊 Настроение</span>
+                <div class="bar-track"><div class="bar-fill"></div></div>
+                <span class="bar-value">50</span>
+            </div>
+            <div class="bar" id="bar-energy">
+                <span class="bar-label">⚡ Энергия</span>
+                <div class="bar-track"><div class="bar-fill"></div></div>
+                <span class="bar-value">80</span>
+            </div>
+            <div class="bar" id="bar-health">
+                <span class="bar-label">❤️ Здоровье</span>
+                <div class="bar-track"><div class="bar-fill"></div></div>
+                <span class="bar-value">100</span>
+            </div>
+            <div class="bar" id="bar-cleanliness">
+                <span class="bar-label">🛁 Чистота</span>
+                <div class="bar-track"><div class="bar-fill"></div></div>
+                <span class="bar-value">80</span>
+            </div>
+        </div>
+
+        <!-- data-action - номер действия, как в меню консольной версии -->
+        <div class="actions">
+            <button class="action" data-action="1"><span>🍖</span>Покормить</button>
+            <button class="action" data-action="2"><span>🎾</span>Поиграть</button>
+            <button class="action" data-action="3"><span>💤</span>Спать</button>
+            <button class="action" data-action="4"><span>🛁</span>Искупать</button>
+            <button class="action" data-action="5"><span>💉</span>Полечить</button>
+            <button class="action" data-action="6"><span>🪑</span>Посидеть</button>
+        </div>
+    </section>
+
+    <!-- ========== Экран 3: концовка ========== -->
+    <section id="screen-end" class="screen hidden">
+        <h1 id="end-title" class="title">ГАВ-ГАВ!</h1>
+        <div id="end-scene" class="scene">
+            <img id="end-dog" class="dog" src="img/puppy.gif" alt="Питомец">
+            <div id="end-effects" class="effects"></div>
+        </div>
+        <p id="end-text" class="end-text"></p>
+        <p id="end-days" class="hint"></p>
+        <button id="btn-again" class="big-button">Новая игра</button>
+    </section>
+
+    <footer class="credits">
+        Illustrations by <a href="https://icons8.com" target="_blank">Icons8</a>
+    </footer>
+
+    <!-- Сначала app.js готовит объект Module, потом pet.js (C++) его заполняет -->
+    <script src="app.js"></script>
+    <script src="pet.js"></script>
+</body>
+</html>
