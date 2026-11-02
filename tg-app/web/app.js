@@ -395,16 +395,13 @@ function playAnimation(choice) {
         spawn(fx, "💛", "rise", 70, 120, 0.4, 1.1);
     }
     else if (choice == 3) {
-        // спать: подъезжает лежанка, щенок ложится, через полсекунды засыпает
+        // спать: лежанка появляется сразу, щенок ложится на неё
         makeBed(fx);
-        setActionClass("lying-down");
-        setTimeout(function () {
-            setDog("img/sleep.gif");
-            setActionClass("sleeping");
-            for (var j = 0; j < 4; j++) {
-                spawn(fx, "💤", "rise", 62 + j * 6, 130, j * 0.4, 1.2);
-            }
-        }, 500);
+        setDog("img/sleep.gif");
+        setActionClass("sleeping");
+        for (i = 0; i < 4; i++) {
+            spawn(fx, "💤", "rise", 62 + i * 6, 130, i * 0.4, 1.2);
+        }
     }
     else if (choice == 4) {
         // купание: ванна успевает подъехать, потом щенок в пене

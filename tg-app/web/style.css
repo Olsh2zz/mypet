@@ -111,10 +111,6 @@ body {
     animation: settle 0.4s ease-out, breathe 3s ease-in-out 0.4s infinite;
 }
 
-.scene.lying-down .dog {
-    animation: lie-down 0.5s ease-in forwards;
-}
-
 .scene.act-feed .dog { animation: nod 0.4s ease-in-out 4; }
 .scene.act-play .dog { animation: jump 0.5s ease-out 3; }
 .scene.act-heal .dog { animation: nod 0.6s ease-in-out 2; }
@@ -139,11 +135,14 @@ body {
     background: #c98bb9;
     border-radius: 50%;
     box-shadow: inset 0 -8px 0 #a86a98;
-    animation: tub-in 3s ease-in-out both;
+    animation: bed-in 3s ease-in-out both;
 }
 
-@keyframes lie-down {
-    to { transform: translateY(30px) scaleY(0.75) rotate(-8deg); }
+/* лежанка появляется почти сразу, в конце уезжает вправо */
+@keyframes bed-in {
+    0% { transform: translateX(60px); opacity: 0; }
+    5%, 88% { transform: translateX(0); opacity: 1; }
+    100% { transform: translateX(300px); opacity: 0; }
 }
 
 @keyframes settle {
