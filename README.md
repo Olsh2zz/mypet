@@ -6,6 +6,16 @@
 
 ## Сборка и запуск
 
+Нужны `git` и `g++` (на macOS: `xcode-select --install`).
+
+```bash
+git clone https://github.com/olsh2zz/mypet.git
+```
+
+```bash
+cd mypet
+```
+
 ```bash
 g++ -std=c++17 src/main.cpp -o pet
 ```
